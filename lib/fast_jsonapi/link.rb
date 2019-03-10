@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FastJsonapi
   class Link
     attr_reader :key, :method

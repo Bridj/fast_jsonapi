@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
 describe FastJsonapi::ObjectSerializer, performance: true do
@@ -118,7 +120,7 @@ describe FastJsonapi::ObjectSerializer, performance: true do
   context "when comparing" do
     context "with AMS 0.10.x" do
       [1, 25, 250, 1000].each do |movie_count|
-        it "should serialize #{movie_count} records atleast #{SERIALIZERS[:ams][:speed_factor]} times faster than AMS" do
+        it "serializes #{movie_count} records at least #{SERIALIZERS[:ams][:speed_factor]} times faster than AMS" do
           ams_movies = build_ams_movies(movie_count)
           movies = build_movies(movie_count)
           jsonapi_movies = build_jsonapi_movies(movie_count)
@@ -150,7 +152,7 @@ describe FastJsonapi::ObjectSerializer, performance: true do
 
     context "with AMS 0.10.x and with includes and meta" do
       [1, 25, 250, 1000].each do |movie_count|
-        it "should serialize #{movie_count} records atleast #{SERIALIZERS[:ams][:speed_factor]} times faster than AMS" do
+        it "serializes #{movie_count} records atleast #{SERIALIZERS[:ams][:speed_factor]} times faster than AMS" do
           ams_movies = build_ams_movies(movie_count)
           movies = build_movies(movie_count)
           jsonapi_movies = build_jsonapi_movies(movie_count)
@@ -162,9 +164,15 @@ describe FastJsonapi::ObjectSerializer, performance: true do
 
           serializers = {
             fast_jsonapi: MovieSerializer.new(movies, options),
-            ams: ActiveModelSerializers::SerializableResource.new(ams_movies, include: options[:include], meta: options[:meta]),
-            jsonapi: JSONAPISerializer.new(jsonapi_movies, include: options[:include], meta: options[:meta]),
-            jsonapis: JSONAPISSerializer.new(jsonapis_movies, include: options[:include].map { |i| i.to_s.dasherize }, meta: options[:meta])
+            ams: ActiveModelSerializers::SerializableResource.new(
+              ams_movies, include: options[:include], meta: options[:meta]
+            ),
+            jsonapi: JSONAPISerializer.new(
+              jsonapi_movies, include: options[:include], meta: options[:meta]
+            ),
+            jsonapis: JSONAPISSerializer.new(
+              jsonapis_movies, include: options[:include].map { |i| i.to_s.dasherize }, meta: options[:meta]
+            )
           }
 
           message = "Serialize to JSON string #{movie_count} with includes and meta"
@@ -186,7 +194,7 @@ describe FastJsonapi::ObjectSerializer, performance: true do
 
     context "with AMS 0.10.x and with polymorphic has_many" do
       [1, 25, 250, 1000].each do |group_count|
-        it "should serialize #{group_count} records at least #{SERIALIZERS[:ams][:speed_factor]} times faster than AMS" do
+        it "serializes #{group_count} records at least #{SERIALIZERS[:ams][:speed_factor]} times faster than AMS" do
           ams_groups = build_ams_groups(group_count)
           groups = build_groups(group_count)
           jsonapi_groups = build_jsonapi_groups(group_count)

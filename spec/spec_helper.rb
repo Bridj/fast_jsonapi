@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_record"
 require "fast_jsonapi"
 require "rspec-benchmark"

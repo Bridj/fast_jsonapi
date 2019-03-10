@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FastJsonapi
   class Attribute
     attr_reader :key, :method, :conditional_proc
@@ -9,12 +11,12 @@ module FastJsonapi
     end
 
     def serialize(record, serialization_params, output_hash)
-      if include_attribute?(record, serialization_params)
-        output_hash[key] = if method.is_a?(Proc)
-          method.arity.abs == 1 ? method.call(record) : method.call(record, serialization_params)
-        else
-          record.public_send(method)
-        end
+      return unless include_attribute?(record, serialization_params)
+
+      output_hash[key] = if method.is_a?(Proc)
+        method.arity.abs == 1 ? method.call(record) : method.call(record, serialization_params)
+      else
+        record.public_send(method)
       end
     end
 

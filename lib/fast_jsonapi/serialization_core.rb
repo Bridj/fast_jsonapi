@@ -64,14 +64,24 @@ module FastJsonapi
 
       def record_hash(record, fieldset, params = {})
         if cached
-          record_hash = Rails.cache.fetch(record.cache_key, expires_in: cache_length, race_condition_ttl: race_condition_ttl) do
+          record_hash = Rails.cache.fetch(
+            record.cache_key,
+            expires_in: cache_length,
+            race_condition_ttl: race_condition_ttl
+          ) do
             id_hash(id_from_record(record), true).tap do |hash|
               hash.merge! attributes_hash(record, fieldset, params) if attributes_to_serialize.present?
-              hash.merge! relationships_hash(record, cachable_relationships_to_serialize, fieldset, params) if cachable_relationships_to_serialize.present?
               hash.merge! links_hash(record, params) if data_links.present?
+
+              if cachable_relationships_to_serialize.present?
+                hash.merge! relationships_hash(record, cachable_relationships_to_serialize, fieldset, params)
+              end
             end
           end
-          record_hash.merge! relationships_hash(record, uncachable_relationships_to_serialize, fieldset, params) if uncachable_relationships_to_serialize.present?
+
+          if uncachable_relationships_to_serialize.present?
+            record_hash.merge! relationships_hash(record, uncachable_relationships_to_serialize, fieldset, params)
+          end
         else
           record_hash = id_hash(id_from_record(record), true)
           record_hash.merge! attributes_hash(record, fieldset, params) if attributes_to_serialize.present?

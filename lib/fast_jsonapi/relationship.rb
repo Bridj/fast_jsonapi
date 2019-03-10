@@ -1,8 +1,13 @@
+# frozen_string_literal: true
+
 module FastJsonapi
   class Relationship
-    attr_reader :key, :name, :id_method_name, :record_type, :object_method_name, :object_block, :serializer, :relationship_type, :cached, :polymorphic, :conditional_proc, :transform_method, :links, :lazy_load_data
+    attr_reader :key, :name, :id_method_name, :record_type,
+                :object_method_name, :object_block, :serializer,
+                :relationship_type, :cached, :polymorphic, :conditional_proc,
+                :transform_method, :links, :lazy_load_data
 
-    def initialize(
+    def initialize( # rubocop:disable Metrics/ParameterLists
       key:,
       name:,
       id_method_name:,

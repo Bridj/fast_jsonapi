@@ -35,17 +35,21 @@ module FastJsonapi
 
       hash_for_one_record
     end
-    alias_method :to_hash, :serializable_hash
+    alias to_hash serializable_hash
 
     def hash_for_one_record
-      serializable_hash = {}
-      serializable_hash[:data] = nil
+      serializable_hash = { data: nil }
       serializable_hash[:meta] = @meta if @meta.present?
       serializable_hash[:links] = @links if @links.present?
 
       return serializable_hash unless @resource
 
-      serializable_hash[:data] = self.class.record_hash(@resource, @fieldsets[self.class.record_type.to_sym], @params)
+      serializable_hash[:data] = self.class.record_hash(
+        @resource,
+        @fieldsets[self.class.record_type.to_sym],
+        @params
+      )
+
       if @includes.present?
         serializable_hash[:data].merge!(
           self.class.get_included_records(
@@ -53,6 +57,7 @@ module FastJsonapi
           )
         )
       end
+
       serializable_hash
     end
 
@@ -98,7 +103,7 @@ module FastJsonapi
       @is_collection = options[:is_collection]
       @params = options[:params] || {}
 
-      raise ArgumentError.new("`params` option passed to serializer must be a hash") unless @params.is_a?(Hash)
+      raise ArgumentError, "`params` option passed to serializer must be a hash" unless @params.is_a?(Hash)
       return unless options[:include].present?
 
       @includes = Array.wrap(options[:include]).flatten.delete_if(&:blank?)
@@ -142,9 +147,14 @@ module FastJsonapi
       includes.each do |item, rest|
         relationships_to_serialize = klass.relationships_to_serialize || {}
         relationship_to_include = relationships_to_serialize[item]
-        raise ArgumentError, "#{item} is not specified as a relationship on #{klass.name}" unless relationship_to_include
 
-        validate_includes!(rest, relationship_to_include.serializer.to_s.constantize) unless relationship_to_include.polymorphic.is_a?(Hash)
+        unless relationship_to_include
+          raise ArgumentError, "#{item} is not specified as a relationship on #{klass.name}"
+        end
+
+        next if relationship_to_include.polymorphic.is_a?(Hash)
+
+        validate_includes!(rest, relationship_to_include.serializer.to_s.constantize)
       end
     end
 
@@ -154,11 +164,24 @@ module FastJsonapi
       end
 
       def inherited(subclass)
-        super(subclass)
-        subclass.attributes_to_serialize = attributes_to_serialize.dup if attributes_to_serialize.present?
-        subclass.relationships_to_serialize = relationships_to_serialize.dup if relationships_to_serialize.present?
-        subclass.cachable_relationships_to_serialize = cachable_relationships_to_serialize.dup if cachable_relationships_to_serialize.present?
-        subclass.uncachable_relationships_to_serialize = uncachable_relationships_to_serialize.dup if uncachable_relationships_to_serialize.present?
+        super subclass
+
+        if attributes_to_serialize.present? # rubocop:disable Style/IfUnlessModifier
+          subclass.attributes_to_serialize = attributes_to_serialize.dup
+        end
+
+        if relationships_to_serialize.present? # rubocop:disable Style/IfUnlessModifier
+          subclass.relationships_to_serialize = relationships_to_serialize.dup
+        end
+
+        if cachable_relationships_to_serialize.present?
+          subclass.cachable_relationships_to_serialize = cachable_relationships_to_serialize.dup
+        end
+
+        if uncachable_relationships_to_serialize.present?
+          subclass.uncachable_relationships_to_serialize = uncachable_relationships_to_serialize.dup
+        end
+
         subclass.transform_method = transform_method
         subclass.cache_length = cache_length
         subclass.race_condition_ttl = race_condition_ttl

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
@@ -32,6 +34,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency("oj", ["~> 3.3"])
   gem.add_development_dependency("rspec", ["~> 3.5.0"])
   gem.add_development_dependency("rspec-benchmark", ["~> 0.3.0"])
+  gem.add_development_dependency("rubocop", ["~> 0.65"])
   gem.add_development_dependency("skylight", ["~> 1.3"])
   gem.add_development_dependency("sqlite3", ["~> 1.3"])
 end
